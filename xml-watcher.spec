@@ -77,5 +77,9 @@ if sys.platform == 'darwin':
             'CFBundleVersion': '1.0.0',
             'CFBundleShortVersionString': '1.0.0',
             'NSHighResolutionCapable': 'True',
+            'LSBackgroundOnly': 'False',
+            'NSAppTransportSecurity': {
+                'NSAllowsArbitraryLoads': 'True'
+            },
         },
     )

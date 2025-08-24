@@ -57,6 +57,10 @@ jobs:
       if: matrix.os != 'windows-latest'
       run: |
         chmod +x dist/xml-watcher
+        # Remove quarantine attribute on macOS to prevent Gatekeeper issues
+        if [[ "$RUNNER_OS" == "macOS" ]]; then
+          xattr -c dist/xml-watcher 2>/dev/null || true
+        fi
         ./dist/xml-watcher --version
 
     - name: Create config directory

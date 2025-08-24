@@ -283,6 +283,43 @@ cd C:\path\to\xml-watcher
 xml-watcher.exe
 ```
 
+## Troubleshooting
+
+### macOS: "Cannot verify developer" or Gatekeeper Issues
+
+If you get a security warning on macOS saying the app cannot be verified:
+
+**Method 1: Remove Quarantine Attribute**
+```bash
+# Navigate to where xml-watcher is located
+xattr -d com.apple.quarantine xml-watcher
+chmod +x xml-watcher
+```
+
+**Method 2: System Preferences**
+1. Try to run the app (it will be blocked)
+2. Go to **System Preferences** → **Security & Privacy**
+3. Click **"Allow Anyway"** next to the xml-watcher entry
+4. Try running the app again, then click **"Open"**
+
+**Method 3: Right-click Method**
+1. Right-click the executable
+2. Select **"Open"** from the context menu
+3. Click **"Open"** in the security dialog
+
+### Windows: SmartScreen or Antivirus Warnings
+
+If Windows Defender or your antivirus blocks the executable:
+1. Add an exception for the xml-watcher.exe file
+2. Or temporarily disable real-time protection during installation
+
+### Linux: Permission Issues
+
+If you get permission denied errors:
+```bash
+chmod +x xml-watcher
+```
+
 ## Development
 
 ### Running tests
