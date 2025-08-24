@@ -8,6 +8,9 @@ on:
     branches: [ main ]
   workflow_dispatch:  # Allow manual trigger
 
+permissions:
+  contents: write  # Required for creating releases and uploading assets
+
 jobs:
   build:
     name: Build on ${{ matrix.os }}
