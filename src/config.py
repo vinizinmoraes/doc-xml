@@ -1,7 +1,6 @@
 """Configuration management for XML Watcher Service."""
 
 import os
-import sys
 from pathlib import Path
 from typing import Dict, Any, Optional
 import yaml

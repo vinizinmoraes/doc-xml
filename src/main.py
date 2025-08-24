@@ -8,6 +8,7 @@ import logging
 import argparse
 from pathlib import Path
 from logging.handlers import RotatingFileHandler
+from typing import Optional
 
 # Add parent directory to path for imports when running as script
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -15,6 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.config import Config, ConfigError
 from src.api_client import APIClient, APIError
 from src.watcher import XMLWatcher
+import logging as logging_module  # Avoid conflict with logger variable
 
 
 # Try to import colorlog for colored output
@@ -28,16 +30,16 @@ except ImportError:
 class XMLWatcherService:
     """Main service class for XML Watcher."""
     
-    def __init__(self, config_path: str = None):
+    def __init__(self, config_path: Optional[str] = None):
         """Initialize the service.
         
         Args:
             config_path: Path to configuration file
         """
-        self.config = None
-        self.api_client = None
-        self.watcher = None
-        self.logger = None
+        self.config: Optional[Config] = None
+        self.api_client: Optional[APIClient] = None
+        self.watcher: Optional[XMLWatcher] = None
+        self.logger: Optional[logging_module.Logger] = None
         self.running = False
         
         # Load configuration
@@ -139,6 +141,9 @@ class XMLWatcherService:
         Args:
             file_path: Path to the file to upload
         """
+        assert self.logger is not None, "Logger not initialized"
+        assert self.api_client is not None, "API client not initialized"
+        
         self.logger.info(f"Processing file: {file_path}")
         
         try:
@@ -152,6 +157,10 @@ class XMLWatcherService:
     
     def start(self):
         """Start the service."""
+        assert self.logger is not None, "Logger not initialized"
+        assert self.config is not None, "Config not initialized"
+        assert self.watcher is not None, "Watcher not initialized"
+        
         self.logger.info(f"Starting {self.config.service_name} service...")
         self.logger.info(f"Watching folder: {self.config.watch_folder}")
         self.logger.info(f"API endpoint: {self.config.api_endpoint}")
@@ -191,6 +200,8 @@ class XMLWatcherService:
             return
         
         self.running = False
+        assert self.logger is not None, "Logger not initialized"
+        
         self.logger.info("Stopping service...")
         
         # Stop watcher
@@ -205,6 +216,7 @@ class XMLWatcherService:
     
     def _signal_handler(self, signum, frame):
         """Handle system signals."""
+        assert self.logger is not None, "Logger not initialized"
         self.logger.info(f"Received signal {signum}")
         self.running = False
 

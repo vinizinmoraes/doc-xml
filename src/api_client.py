@@ -1,13 +1,17 @@
 """API client for uploading XML files."""
 
-import os
 import time
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 import logging
 import requests
 from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
+
+# Type-ignore for mypy - urllib3.util.retry types not fully supported
+try:
+    from requests.packages.urllib3.util.retry import Retry  # type: ignore
+except ImportError:
+    from urllib3.util.retry import Retry  # type: ignore
 
 
 logger = logging.getLogger(__name__)
