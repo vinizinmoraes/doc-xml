@@ -27,10 +27,10 @@ jobs:
             asset_name: xml-watcher-linux
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
 
@@ -82,21 +82,21 @@ jobs:
 
     - name: Upload artifact (Windows)
       if: matrix.os == 'windows-latest'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: xml-watcher-windows
         path: xml-watcher-windows.zip
 
     - name: Upload artifact (macOS)
       if: matrix.os == 'macos-latest'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: xml-watcher-macos
         path: xml-watcher-macos.tar.gz
 
     - name: Upload artifact (Linux)
       if: matrix.os == 'ubuntu-latest'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: xml-watcher-linux
         path: xml-watcher-linux.tar.gz
@@ -107,19 +107,18 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Download all artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
 
     - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: softprops/action-gh-release@v2
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        files: |
+          xml-watcher-windows/xml-watcher-windows.zip
+          xml-watcher-macos/xml-watcher-macos.tar.gz
+          xml-watcher-linux/xml-watcher-linux.tar.gz
         body: |
           ## XML Watcher Service Release
           
@@ -140,33 +139,3 @@ jobs:
           - **macOS/Linux**: Run `./xml-watcher` from terminal
         draft: false
         prerelease: false
-
-    - name: Upload Windows Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: xml-watcher-windows/xml-watcher-windows.zip
-        asset_name: xml-watcher-windows.zip
-        asset_content_type: application/zip
-
-    - name: Upload macOS Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: xml-watcher-macos/xml-watcher-macos.tar.gz
-        asset_name: xml-watcher-macos.tar.gz
-        asset_content_type: application/gzip
-
-    - name: Upload Linux Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: xml-watcher-linux/xml-watcher-linux.tar.gz
-        asset_name: xml-watcher-linux.tar.gz
-        asset_content_type: application/gzip
