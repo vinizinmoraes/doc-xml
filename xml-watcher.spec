@@ -2,10 +2,11 @@
 # PyInstaller spec file for XML Watcher Service
 
 import sys
+import os
 from pathlib import Path
 
-# Get the absolute path to the project root
-ROOT_DIR = Path(__file__).parent.absolute()
+# Get the absolute path to the project root (current working directory)
+ROOT_DIR = Path(os.getcwd())
 
 a = Analysis(
     ['src/main.py'],
@@ -17,7 +18,6 @@ a = Analysis(
     ],
     hiddenimports=[
         'watchdog.observers',
-        'pkg_resources.py2_warn',
         'colorlog',
     ],
     hookspath=[],
