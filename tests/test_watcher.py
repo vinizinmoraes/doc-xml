@@ -135,7 +135,8 @@ class TestXMLFileHandler:
 class TestXMLWatcher:
     """Test cases for XMLWatcher class."""
     
-    def test_init(self, mock_config, mock_upload_callback):
+    @patch('src.watcher.ThreadPoolExecutor')
+    def test_init(self, mock_executor_class, mock_config, mock_upload_callback):
         """Test watcher initialization."""
         watcher = XMLWatcher(mock_config, mock_upload_callback)
         
@@ -145,9 +146,10 @@ class TestXMLWatcher:
         assert watcher.observer is not None
         assert watcher.worker_thread is None
     
+    @patch('src.watcher.ThreadPoolExecutor')
     @patch('src.watcher.Observer')
     @patch('src.watcher.Thread')
-    def test_start_without_existing(self, mock_thread, mock_observer, mock_config, mock_upload_callback):
+    def test_start_without_existing(self, mock_thread, mock_observer, mock_executor_class, mock_config, mock_upload_callback):
         """Test starting watcher without processing existing files."""
         mock_config.process_existing = False
         
@@ -162,11 +164,12 @@ class TestXMLWatcher:
         mock_thread.assert_called_once()
         mock_thread.return_value.start.assert_called_once()
     
+    @patch('src.watcher.ThreadPoolExecutor')
     @patch('src.watcher.Observer')
     @patch('src.watcher.Thread')
     @patch('src.watcher.Path')
     def test_start_with_existing(self, mock_path_class, mock_thread, mock_observer, 
-                                mock_config, mock_upload_callback):
+                                mock_executor_class, mock_config, mock_upload_callback):
         """Test starting watcher with processing existing files."""
         mock_config.process_existing = True
         
@@ -184,12 +187,16 @@ class TestXMLWatcher:
         watcher = XMLWatcher(mock_config, mock_upload_callback)
         watcher.start()
         
-        # Verify existing files were queued
-        assert watcher.file_queue.qsize() == 4  # 2 files x 2 patterns
+        # Verify existing files were queued (duplicates are removed by set())
+        assert watcher.file_queue.qsize() == 2  # 2 unique files
     
+    @patch('src.watcher.ThreadPoolExecutor')
     @patch('src.watcher.Observer')
-    def test_stop(self, mock_observer, mock_config, mock_upload_callback):
+    def test_stop(self, mock_observer, mock_executor_class, mock_config, mock_upload_callback):
         """Test stopping the watcher."""
+        mock_executor = Mock()
+        mock_executor_class.return_value = mock_executor
+        
         watcher = XMLWatcher(mock_config, mock_upload_callback)
         watcher.worker_thread = Mock()
         
@@ -199,10 +206,11 @@ class TestXMLWatcher:
         watcher.observer.stop.assert_called_once()
         watcher.observer.join.assert_called_once()
         watcher.worker_thread.join.assert_called_once()
-        watcher.executor.shutdown.assert_called_once_with(wait=True)
+        mock_executor.shutdown.assert_called_once_with(wait=True)
     
+    @patch('src.watcher.ThreadPoolExecutor')
     @patch('time.sleep')
-    def test_process_file_success(self, mock_sleep, mock_config, mock_upload_callback, tmp_path):
+    def test_process_file_success(self, mock_sleep, mock_executor_class, mock_config, mock_upload_callback, tmp_path):
         """Test successful file processing."""
         # Create test file
         test_file = tmp_path / "test.xml"
@@ -215,8 +223,9 @@ class TestXMLWatcher:
         mock_upload_callback.assert_called_once_with(test_file)
         mock_sleep.assert_called_once_with(0.5)
     
+    @patch('src.watcher.ThreadPoolExecutor')
     @patch('time.sleep')
-    def test_process_file_not_exists(self, mock_sleep, mock_config, mock_upload_callback):
+    def test_process_file_not_exists(self, mock_sleep, mock_executor_class, mock_config, mock_upload_callback):
         """Test processing non-existent file."""
         watcher = XMLWatcher(mock_config, mock_upload_callback)
         watcher._process_file("/non/existent/file.xml")
@@ -224,8 +233,9 @@ class TestXMLWatcher:
         # Upload callback should not be called
         mock_upload_callback.assert_not_called()
     
+    @patch('src.watcher.ThreadPoolExecutor')
     @patch('time.sleep')
-    def test_process_file_with_delete(self, mock_sleep, mock_config, mock_upload_callback, tmp_path):
+    def test_process_file_with_delete(self, mock_sleep, mock_executor_class, mock_config, mock_upload_callback, tmp_path):
         """Test file processing with delete after upload."""
         mock_config.delete_after_upload = True
         
@@ -239,8 +249,9 @@ class TestXMLWatcher:
         # Verify file was deleted
         assert not test_file.exists()
     
+    @patch('src.watcher.ThreadPoolExecutor')
     @patch('time.sleep')
-    def test_process_file_with_move(self, mock_sleep, mock_config, mock_upload_callback, tmp_path):
+    def test_process_file_with_move(self, mock_sleep, mock_executor_class, mock_config, mock_upload_callback, tmp_path):
         """Test file processing with move after upload."""
         processed_folder = tmp_path / "processed"
         mock_config.processed_folder = str(processed_folder)
@@ -256,7 +267,8 @@ class TestXMLWatcher:
         assert not test_file.exists()
         assert (processed_folder / "test.xml").exists()
     
-    def test_get_queue_size(self, mock_config, mock_upload_callback):
+    @patch('src.watcher.ThreadPoolExecutor')
+    def test_get_queue_size(self, mock_executor_class, mock_config, mock_upload_callback):
         """Test getting queue size."""
         watcher = XMLWatcher(mock_config, mock_upload_callback)
         
