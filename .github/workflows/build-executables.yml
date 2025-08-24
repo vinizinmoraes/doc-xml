@@ -1,0 +1,172 @@
+name: Build Executables
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact_name: xml-watcher.exe
+            asset_name: xml-watcher-windows.exe
+          - os: macos-latest
+            artifact_name: xml-watcher
+            asset_name: xml-watcher-macos
+          - os: ubuntu-latest
+            artifact_name: xml-watcher
+            asset_name: xml-watcher-linux
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+
+    - name: Build executable with PyInstaller
+      run: |
+        pyinstaller xml-watcher.spec --clean
+
+    - name: Test executable (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        dist\xml-watcher.exe --version
+      shell: cmd
+
+    - name: Test executable (Unix)
+      if: matrix.os != 'windows-latest'
+      run: |
+        chmod +x dist/xml-watcher
+        ./dist/xml-watcher --version
+
+    - name: Create config directory
+      run: |
+        mkdir -p dist/config
+        cp config/config.yaml.example dist/config/
+
+    - name: Create archive (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        cd dist
+        7z a -tzip ../xml-watcher-windows.zip xml-watcher.exe config/
+      shell: cmd
+
+    - name: Create archive (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        cd dist
+        tar -czf ../xml-watcher-macos.tar.gz xml-watcher config/
+
+    - name: Create archive (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        cd dist
+        tar -czf ../xml-watcher-linux.tar.gz xml-watcher config/
+
+    - name: Upload artifact (Windows)
+      if: matrix.os == 'windows-latest'
+      uses: actions/upload-artifact@v3
+      with:
+        name: xml-watcher-windows
+        path: xml-watcher-windows.zip
+
+    - name: Upload artifact (macOS)
+      if: matrix.os == 'macos-latest'
+      uses: actions/upload-artifact@v3
+      with:
+        name: xml-watcher-macos
+        path: xml-watcher-macos.tar.gz
+
+    - name: Upload artifact (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      uses: actions/upload-artifact@v3
+      with:
+        name: xml-watcher-linux
+        path: xml-watcher-linux.tar.gz
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |
+          ## XML Watcher Service Release
+          
+          ### Downloads
+          - **Windows**: `xml-watcher-windows.zip`
+          - **macOS**: `xml-watcher-macos.tar.gz`
+          - **Linux**: `xml-watcher-linux.tar.gz`
+          
+          ### Installation
+          1. Download the appropriate file for your platform
+          2. Extract the archive
+          3. Copy `config/config.yaml.example` to `config/config.yaml`
+          4. Edit `config/config.yaml` with your settings
+          5. Run the executable
+          
+          ### Running
+          - **Windows**: Double-click `xml-watcher.exe` or run from command prompt
+          - **macOS/Linux**: Run `./xml-watcher` from terminal
+        draft: false
+        prerelease: false
+
+    - name: Upload Windows Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: xml-watcher-windows/xml-watcher-windows.zip
+        asset_name: xml-watcher-windows.zip
+        asset_content_type: application/zip
+
+    - name: Upload macOS Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: xml-watcher-macos/xml-watcher-macos.tar.gz
+        asset_name: xml-watcher-macos.tar.gz
+        asset_content_type: application/gzip
+
+    - name: Upload Linux Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: xml-watcher-linux/xml-watcher-linux.tar.gz
+        asset_name: xml-watcher-linux.tar.gz
+        asset_content_type: application/gzip

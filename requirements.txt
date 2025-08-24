@@ -1,0 +1,21 @@
+# Core dependencies
+watchdog==3.0.0          # Cross-platform file system event monitoring
+requests==2.31.0         # HTTP library for API communication
+PyYAML==6.0.1           # YAML configuration file support
+python-dotenv==1.0.0    # Environment variable management
+
+# Development dependencies
+pytest==7.4.3           # Testing framework
+pytest-cov==4.1.0       # Coverage reporting
+pytest-mock==3.11.1     # Mocking for tests
+black==23.10.1          # Code formatter
+flake8==6.1.0          # Linting
+mypy==1.6.1            # Type checking
+pyinstaller==6.1.0     # Create standalone executables
+
+# Platform-specific dependencies
+pywin32==306; sys_platform == 'win32'  # Windows service support
+
+# Optional dependencies for enhanced functionality
+colorlog==6.7.0         # Colored logging output
+tqdm==4.66.1           # Progress bars for batch processing

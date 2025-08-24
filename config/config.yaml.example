@@ -1,0 +1,76 @@
+# XML Watcher Service Configuration
+
+# Folder to watch for XML files
+watch_folder: "/path/to/watch/folder"
+
+# API configuration
+api:
+  # API endpoint to send XML files
+  endpoint: "https://api.example.com/upload"
+  
+  # Authentication (optional)
+  auth:
+    # Authentication type: "bearer", "basic", or "none"
+    type: "bearer"
+    # For bearer token
+    token: "your-api-token-here"
+    # For basic auth
+    # username: "your-username"
+    # password: "your-password"
+  
+  # Request timeout in seconds
+  timeout: 30
+  
+  # Number of retry attempts
+  retry_attempts: 3
+  
+  # Delay between retries in seconds
+  retry_delay: 5
+
+# File processing
+processing:
+  # File patterns to watch (glob patterns)
+  patterns:
+    - "*.xml"
+    - "*.XML"
+  
+  # Whether to process existing files on startup
+  process_existing: false
+  
+  # Delete files after successful upload
+  delete_after_upload: false
+  
+  # Move files to this folder after processing (if delete_after_upload is false)
+  # Leave empty to keep files in place
+  processed_folder: ""
+
+# Logging configuration
+logging:
+  # Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: "INFO"
+  
+  # Log file path (leave empty for console only)
+  file: "logs/xml-watcher.log"
+  
+  # Maximum log file size in MB
+  max_size: 10
+  
+  # Number of backup files to keep
+  backup_count: 5
+  
+  # Enable colored console output
+  colored_output: true
+
+# Service configuration
+service:
+  # Service name (for logging and system integration)
+  name: "xml-watcher"
+  
+  # Check interval in seconds (how often to check for new files)
+  check_interval: 1
+  
+  # Enable recursive watching of subdirectories
+  recursive: true
+  
+  # Maximum number of concurrent uploads
+  max_concurrent_uploads: 5
