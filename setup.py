@@ -5,18 +5,26 @@ from setuptools import setup, find_packages
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-with open("requirements.txt", "r", encoding="utf-8") as fh:
-    requirements = [line.strip() for line in fh if line.strip() and not line.startswith("#")]
+# Runtime dependencies only - development dependencies should not be included
+requirements = [
+    "watchdog==3.0.0",
+    "requests==2.31.0", 
+    "PyYAML==6.0.1",
+    "python-dotenv==1.0.0",
+    "colorlog==6.7.0",
+    "tqdm==4.66.1",
+    "pywin32==306; sys_platform == 'win32'",
+]
 
 setup(
     name="xml-watcher",
     version="1.0.0",
-    author="Your Name",
-    author_email="your.email@example.com",
+    author="Vinícius Morais",
+    author_email="vinizinmoraes@users.noreply.github.com",
     description="A cross-platform service that monitors folders for XML files and uploads them to an API",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/xml-watcher",
+    url="https://github.com/vinizinmoraes/doc-xml",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",

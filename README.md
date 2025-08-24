@@ -61,6 +61,19 @@ cd xml-watcher
 xml-watcher.exe
 ```
 
+## Installation as Python Package
+
+You can also install XML Watcher as a Python package:
+
+```bash
+pip install xml-watcher
+```
+
+Then run it with:
+```bash
+xml-watcher --config /path/to/config.yaml
+```
+
 ## Installation from Source
 
 ### Requirements
@@ -73,8 +86,8 @@ xml-watcher.exe
 #### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/xml-watcher.git
-cd xml-watcher
+git clone https://github.com/vinizinmoraes/doc-xml.git
+cd doc-xml
 ```
 
 #### 2. Create a virtual environment (recommended)
@@ -92,7 +105,11 @@ venv\Scripts\activate
 #### 3. Install dependencies
 
 ```bash
+# For runtime dependencies only
 pip install -r requirements.txt
+
+# For development (includes testing, linting, building tools)
+pip install -r requirements-dev.txt
 ```
 
 #### 4. Configure the service

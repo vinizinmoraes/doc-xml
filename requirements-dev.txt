@@ -1,0 +1,21 @@
+# Development dependencies - install with: pip install -r requirements-dev.txt
+
+# Include runtime dependencies
+-r requirements.txt
+
+# Testing dependencies
+pytest==7.4.3           # Testing framework
+pytest-cov==4.1.0       # Coverage reporting
+pytest-mock==3.11.1     # Mocking for tests
+
+# Code quality dependencies
+black==23.10.1          # Code formatter
+flake8==6.1.0          # Linting
+mypy==1.6.1            # Type checking
+types-requests           # Type stubs for requests
+types-PyYAML            # Type stubs for PyYAML
+
+# Build dependencies
+pyinstaller==6.1.0     # Create standalone executables
+build                   # Build system
+twine                   # Package distribution
